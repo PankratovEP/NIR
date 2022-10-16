@@ -56,7 +56,7 @@ def four():
             stroki = list(map(int, input('Введите rowid интересующих строк через пробел: ').split()))
             for i in stroki:
                 dat_type = lambda x: int(x) if x.isdigit() and len(x) < 20 else str(x)
-                new = dat_type(input("Введите новое значение: "))
+                new = dat_type(input("Введите новое значение (оценку и семестр в кавычки заключать не надо): "))
                 cur.execute(f"UPDATE scores SET {pole} = {new} WHERE rowid = {i}")
         elif oper == 1:  # операция удаления строки целиком
             udalenie = list(map(int, input('Введите rowid строк для удаления через пробел: ').split()))
