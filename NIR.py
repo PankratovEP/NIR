@@ -3,7 +3,7 @@ import os
 
 # Отображение полей БД
 def vivod_info():
-    with sq.connect('NIR.db') as con:
+    with sq.connect('NIR.sqlite') as con:
         cur = con.cursor()
         ls = list(cur.execute('PRAGMA table_info(scores)'))
         print("Таблица содержит следующие поля: ")
@@ -12,7 +12,7 @@ def vivod_info():
 
 # Отображение текущего содержимого таблицы БД на экране в виде таблицы
 def one():
-    with sq.connect('NIR.db') as con:
+    with sq.connect('NIR.sqlite') as con:
         cur = con.cursor()
         tablica = cur.execute('SELECT rowid, * FROM scores')
         [print(*i, sep='  ') for i in tablica]
@@ -20,7 +20,7 @@ def one():
 
 # Сохранение текущего содержимого таблицы БД в текстовый файл с задаваемым именем
 def two():
-    with sq.connect('NIR.db') as con, open(f'{input("Введите имя файла для вывода информации: ")}', 'w') as output:
+    with sq.connect('NIR.sqlite') as con, open(f'{input("Введите имя файла для вывода информации: ")}', 'w') as output:
         cur = con.cursor()
         tablica = cur.execute('SELECT * FROM scores')
         for i in tuple(tablica):
@@ -33,7 +33,7 @@ def two():
 def three():
     vivod_info()
     colom = input('Введите имя интересующего поля: ')
-    with sq.connect('NIR.db') as con:
+    with sq.connect('NIR.sqlite') as con:
         cur = con.cursor()
         cur.execute(f'SELECT * FROM scores WHERE {input(f"Введите условие (логич-ое выражение) поиска по {colom}: ")}')
         result = cur.fetchall()
@@ -48,7 +48,7 @@ def four():
     1) Удалить данные из БД 
     2) Замена значений во всех строках в выбранном поле на выбранное значение
     Операция: '''))
-    with sq.connect('NIR.db') as con:
+    with sq.connect('NIR.sqlite') as con:
         cur = con.cursor()
         if oper == 2:  # операция замены в выбранных строках значений, которые сам выбирает и задает пользователь
             vivod_info()
@@ -66,7 +66,7 @@ def four():
 
 # Добавление новой строки с заданными значениями полей в таблицу БД.
 def five():
-    with sq.connect('NIR.db') as con:
+    with sq.connect('NIR.sqlite') as con:
         cur = con.cursor()
         params = (input('Код дисциплины по учебному плану: '), input('Название дисциплины: '),
         int(input('Номер семестра с аттестацией по дисциплине: ')), input('Тип аттестации (экзамен/зачет): '),
