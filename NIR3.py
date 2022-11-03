@@ -11,7 +11,7 @@ def otobr():
     with sq.connect('VUZ.sqlite') as con:
         cur = con.cursor()
         tablica = cur.execute(f'SELECT rowid, * FROM {tab_name}')
-        [print(*i) for i in tablica]
+        [print(*i[1:]) for i in tablica]
 
 
 
@@ -61,3 +61,14 @@ def perv_punkt():
 преподавателей» - общее количество преподавателей в вузах выбранного
 субъекта РФ.'''
 def vtor_punkt():
+    with sq.connect('VUZ.sqlite') as con:
+        input = ('Введите')
+        cur = con.cursor()
+        print('В таблице присутствуют следующие регионы: ')
+        [print(i[0].strip(), end='  ') for i in set(cur.execute('SELECT region FROM vuzkart'))]
+        reg = input('Введите интересующий Вас регион, если хотите выбрать все регионы, то введите: ')
+        while reion not in [i[0].strip() for i in set(cur.execute('SELECT region FROM vuzkart'))].extend('//*'):
+            print('Пожалуйста, укажите корректное значение!')
+            reg = input('Введите интересующий Вас регион, если хотите выбрать все регионы, то введите "*": ')
+
+vtor_punkt()
