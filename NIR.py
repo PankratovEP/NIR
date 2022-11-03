@@ -102,3 +102,5 @@ while True:
         exit(print('Всего доброго!'))
     else:
         ex(che_delat)()
+
+
