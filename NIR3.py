@@ -1,6 +1,5 @@
 import sqlite3 as sq
 
-
 '''Программа должна обеспечивать отображение, по выбору пользователя,
 каждой из двух таблиц, содержащихся в БД, а также предложение завершить
 программу'''
@@ -66,9 +65,11 @@ def vtor_punkt():
         cur = con.cursor()
         print('В таблице присутствуют следующие регионы: ')
         [print(i[0].strip(), end='  ') for i in set(cur.execute('SELECT region FROM vuzkart'))]
-        reg = input('Введите интересующий Вас регион, если хотите выбрать все регионы, то введите: ')
-        while reion not in [i[0].strip() for i in set(cur.execute('SELECT region FROM vuzkart'))].extend('//*'):
+        regs = [i for i in set(cur.execute('SELECT region FROM vuzkart'))]
+        '''reg = input('Введите интересующий Вас регион, если хотите выбрать все регионы, то введите: ')
+        while reg not in:
             print('Пожалуйста, укажите корректное значение!')
-            reg = input('Введите интересующий Вас регион, если хотите выбрать все регионы, то введите "*": ')
-
+            reg = input('Введите интересующий Вас регион, если хотите выбрать все регионы, то введите "*": ')'''
+        print(regs)
 vtor_punkt()
+
