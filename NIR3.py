@@ -88,9 +88,10 @@ def vtor_punkt():
 
             dic_tab["Кол-во преподавателей"].extend([sum(profes), sum(doct), sum(ktn), sum(docent), pps])
             prcnt = [toFixed((int(i) / pps) * 100, 3) for i in dic_tab["Кол-во преподавателей"]]
-            dic_tab['Процент от общнего кол-ва препод-ей'].extend(prcnt)
+            dic_tab['Процент от общего кол-ва препод-ей'].extend(prcnt)
+            dic_tab['Порядковый номер'].extend(list(range(1, len(dic_tab['Наличие уч. степени']) + 1)))
             print()
-            print(pd.DataFrame(dic_tab).to_markdown())
+            print(pd.DataFrame(dic_tab).to_markdown(index=False))
 
         cur = con.cursor()
         print('\nВ таблице присутствуют следующие регионы: ')
@@ -98,9 +99,10 @@ def vtor_punkt():
         reg = input('\n\nВведите интересующий Вас регион, если хотите выбрать все регионы, то введите "Всего": ')
         dic_reg = dict(zip([i[0].strip() for i in set(cur.execute('SELECT region FROM vuzkart'))] + ["Всего"],
                        [i[0] for i in set(cur.execute('SELECT region FROM vuzkart'))] + ["Всего"]))
-        dic_tab = {'Наличие уч. степени': ['Профессора', 'Доктора наук', 'Кандидаты Наук', 'Доценты', 'Все'],
+        dic_tab = {'Порядковый номер': [],
+                   'Наличие уч. степени': ['Профессора', 'Доктора наук', 'Кандидаты Наук', 'Без уч. степени', 'Все'],
                    'Кол-во преподавателей': [],
-                   'Процент от общнего кол-ва препод-ей': []}
+                   'Процент от общего кол-ва препод-ей': []}
         while reg not in dic_reg.keys():
             print('Пожалуйста, укажите корректное значение!')
             reg = input(r'Введите интересующий Вас регион, если хотите выбрать все регионы, то введите "Всего": ')
