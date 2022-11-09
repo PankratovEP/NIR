@@ -1,11 +1,12 @@
 import sqlite3 as sq
 import pandas as pd
-
+from itertools import chain
 
 
 '''Программа должна обеспечивать отображение, по выбору пользователя,
 каждой из двух таблиц, содержащихся в БД, а также предложение завершить
 программу'''
+
 
 def otobr():
     tab_name = input('''\nВ базе данных присутствуют 2 таблицы\n"vuzkart"-картотека с записями, содержащими сведения о вузах России.
@@ -15,7 +16,7 @@ def otobr():
         print('\nТаблица не существует! Пожалуйста, повторите попытку.\n')
         tab_name = input('''В базе данных присутствуют 2 таблицы\n"vuzkart"-картотека с записями, содержащими сведения о вузах России.
 "vuzstat"- таблица содержащая статистические данные по вузам.
-Введите название таблицы, которую хотите отобразить: ''')
+Введите имя таблицы, которую хотите отобразить: ''')
     with sq.connect('VUZ.sqlite') as con:
         cur = con.cursor()
         tablica = cur.execute(f'SELECT rowid, * FROM {tab_name}')
@@ -31,6 +32,7 @@ def otobr():
 Составить и отобразить на экране перечень полных наименований вузов, соответствующих
 выбранному профилю и имеющих значение указанного отношения ниже
 порога.'''
+
 
 def perv_punkt():
     with sq.connect('VUZ.sqlite') as con:
@@ -72,29 +74,22 @@ def perv_punkt():
 преподавателей» - общее количество преподавателей в вузах выбранного
 субъекта РФ.'''
 
+
 def vtor_punkt():
     with sq.connect('VUZ.sqlite') as con:
         def tabl(ids):
-            vuz = [[j[0] for j in cur.execute(f'SELECT z1 FROM vuzkart WHERE codvuz == "{i}"')][0].strip() for i in
-                   ids] + ['']
-            pps = [[j[0] for j in cur.execute(f'SELECT pps FROM vuzstat WHERE codvuz == "{i}"')][0] for i in ids]
+            profes = [[j[0] for j in cur.execute(f'SELECT pr FROM vuzstat WHERE codvuz == "{i}"')][0] for i in ids]
             docent = [[j[0] for j in cur.execute(f'SELECT dc FROM vuzstat WHERE codvuz == "{i}"')][0] for i in ids]
             doct = [[j[0] for j in cur.execute(f'SELECT dn FROM vuzstat WHERE codvuz == "{i}"')][0] for i in ids]
             ktn = [[j[0] for j in cur.execute(f'SELECT kn FROM vuzstat WHERE codvuz == "{i}"')][0] for i in ids]
-            uch_step = pd.array(ktn) + pd.array(doct)
+            pps = sum(profes) + sum(doct) + sum(docent) + sum(ktn)
             def toFixed(numObj, digits=0):
                 return f"{numObj:.{digits}f}"
 
-            prcnt = [toFixed((i / sum(pps)) * 100, 2) for i in pps] + ['']
-            dic_tab['Общее кол-во преподавателей'].extend(pps + [sum(pps)])
-            dic_tab['Кол-во доцентов'].extend(docent + [sum(docent)])
-            dic_tab['Кол-во докторов наук'].extend(doct + [sum(doct)])
-            dic_tab['Кол-во кандидатов наук'].extend(ktn + [sum(ktn)])
-            dic_tab['Кол-во препод-ей с уч. степенью'].extend(uch_step)
-            dic_tab['Кол-во препод-ей с уч. степенью'].extend([sum(uch_step)])
-            dic_tab['Вуз'].extend(vuz)
+            dic_tab["Кол-во преподавателей"].extend([sum(profes), sum(doct), sum(ktn), sum(docent), pps])
+            prcnt = [toFixed((int(i) / pps) * 100, 3) for i in dic_tab["Кол-во преподавателей"]]
             dic_tab['Процент от общнего кол-ва препод-ей'].extend(prcnt)
-            print('\n', '*' * 124, dic_tab["Регион"][0], '*' * 125, '\n')
+            print()
             print(pd.DataFrame(dic_tab).to_markdown())
 
         cur = con.cursor()
@@ -103,13 +98,8 @@ def vtor_punkt():
         reg = input('\n\nВведите интересующий Вас регион, если хотите выбрать все регионы, то введите "Всего": ')
         dic_reg = dict(zip([i[0].strip() for i in set(cur.execute('SELECT region FROM vuzkart'))] + ["Всего"],
                        [i[0] for i in set(cur.execute('SELECT region FROM vuzkart'))] + ["Всего"]))
-        dic_tab = {'Регион': [],
-                   'Вуз': [],
-                   'Кол-во препод-ей с уч. степенью': [],  # наличие уч. степени
-                   'Кол-во докторов наук': [],
-                   'Кол-во кандидатов наук': [],
-                   'Кол-во доцентов': [],
-                   'Общее кол-во преподавателей': [],
+        dic_tab = {'Наличие уч. степени': ['Профессора', 'Доктора наук', 'Кандидаты Наук', 'Доценты', 'Все'],
+                   'Кол-во преподавателей': [],
                    'Процент от общнего кол-ва препод-ей': []}
         while reg not in dic_reg.keys():
             print('Пожалуйста, укажите корректное значение!')
@@ -117,21 +107,10 @@ def vtor_punkt():
         if reg == "Всего":
             regs = list(dic_reg.keys())
             id_s = [[i[0] for i in cur.execute(f'SELECT codvuz FROM vuzkart WHERE region =="{dic_reg[j]}"')] for j in regs][: -1]
-            for i in range(len(id_s)):
-                dic_tab = {'Регион': [],
-                           'Вуз': [],
-                           'Кол-во препод-ей с уч. степенью': [],  # наличие уч. степени
-                           'Кол-во докторов наук': [],
-                           'Кол-во кандидатов наук': [],
-                           'Кол-во доцентов': [],
-                           'Общее кол-во преподавателей': [],
-                           'Процент от общнего кол-ва препод-ей': []
-                           }
-                dic_tab['Регион'].extend([list(dic_reg.keys())[i]] * len(id_s[i]) + ['Всего'])
-                tabl(id_s[i])
+            id_s = list(chain.from_iterable(id_s))
+            tabl(id_s)
         else:
             id_s = [i[0] for i in cur.execute(f'SELECT codvuz FROM vuzkart WHERE region == "{dic_reg[reg]}"')]
-            dic_tab['Регион'].extend([reg]*len(id_s) + ['Всего'])
             tabl(id_s)
 
 
@@ -159,4 +138,3 @@ while True:
         exit(print("Всего доброго!"))
     else:
         vizov(oper)()
-
